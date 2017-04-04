@@ -954,5 +954,4 @@ func TestMerge(t *testing.T) {
 			t.Errorf("Merge of group %v failed. Got %v, expected %v.", test.name, merged, test.ExpectedGroup)
 		}
 	}
-
 }

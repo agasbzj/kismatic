@@ -85,6 +85,7 @@ bin/inspector/$(GOOS)/amd64/kismatic-inspector: vendor
 clean:
 	rm -rf bin
 	rm -rf out
+	rm -rf out-docker
 	rm -rf vendor
 	rm -rf vendor-ansible
 	rm -rf vendor-terraform
@@ -134,7 +135,7 @@ vendor-ansible/out:
 vendor-swagger-ui/out:
 	mkdir -p vendor-swagger-ui/
 	curl -L https://github.com/swagger-api/swagger-ui/archive/v$(SWAGGER-UI_VERSION).tar.gz | tar -xz -C vendor-swagger-ui/
-	sed -i 's@http://petstore.swagger.io/v2/swagger.json@/spec/v1/swagger.json@g' vendor-swagger-ui/swagger-ui-$(SWAGGER-UI_VERSION)/dist/index.html
+	sed -i "" 's@http://petstore.swagger.io/v2/swagger.json@/spec/v1/swagger.json@g' vendor-swagger-ui/swagger-ui-$(SWAGGER-UI_VERSION)/dist/index.html
 
 vendor-terraform/out:
 	mkdir -p vendor-terraform/out/darwin
@@ -197,6 +198,29 @@ bare-dist: vendor-ansible/out vendor-terraform/out vendor-swagger-ui/out vendor-
 	rm -f out/kismatic.tar.gz
 	tar -czf kismatic.tar.gz -C out .
 	mv kismatic.tar.gz out
+
+docker-dist: vendor-ansible/out vendor-terraform/out vendor-swagger-ui/out vendor-kuberang/$(KUBERANG_VERSION) vendor-kubectl/out/kubectl-$(KUBECTL_VERSION)-$(GOOS)-amd64 vendor-helm/out/helm-$(HELM_VERSION)-$(GOOS)-amd64 bare-build bare-build-inspector
+	mkdir -p out-docker
+	cp bin/$(GOOS)/kismatic out-docker
+	mkdir -p out-docker/ansible
+	cp -r vendor-ansible/out/ansible/* out-docker/ansible
+	rm -rf out-docker/ansible/playbooks
+	cp -r ansible out-docker/ansible/playbooks
+	mkdir -p out-docker/ansible/playbooks/inspector
+	cp -r bin/inspector/* out-docker/ansible/playbooks/inspector
+	mkdir -p out-docker/ansible/playbooks/kuberang/linux/amd64/
+	cp vendor-kuberang/$(KUBERANG_VERSION)/kuberang-linux-amd64 out-docker/ansible/playbooks/kuberang/linux/amd64/kuberang
+	cp vendor-terraform/out/$(GOOS)/terraform out-docker/terraform
+	cp -r providers out-docker/providers
+	mkdir -p out-docker/swagger-ui/spec
+	cp -r vendor-swagger-ui/swagger-ui-$(SWAGGER-UI_VERSION)/dist out-docker/swagger-ui
+	cp docs/swagger.json out-docker/swagger-ui/spec
+	cp vendor-kubectl/out/kubectl-$(KUBECTL_VERSION)-$(GOOS)-amd64 out-docker/kubectl
+	cp vendor-helm/out/helm-$(HELM_VERSION)-$(GOOS)-amd64 out-docker/helm
+	rm -f out-docker/kismatic.tar.gz
+	tar -czf kismatic.tar.gz -C out-docker .
+	mv kismatic.tar.gz out-docker
+	docker build . --no-cache --file Dockerfile --tag apprenda/kismatic:dev && docker push apprenda/kismatic:dev
 
 get-ginkgo:
 	go get github.com/onsi/ginkgo/ginkgo

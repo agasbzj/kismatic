@@ -47,6 +47,9 @@ jobs:
           name: Copy linux pkg to release dir # Used for releasing to GH
           command: cp out/kismatic.tar.gz release/kismatic-${CIRCLE_TAG}-linux-amd64.tar.gz
       - run:
+          name: Docker dist
+          command: make docker-dist
+      - run:
           name: Set integration test SSH Key 
           command: echo "$KISMATIC_INT_TEST_KEY" | base64 -d > ~/.ssh/kismatic-integration-testing.pem
       - run:
