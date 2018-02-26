@@ -8,8 +8,7 @@ _obj
 _test
 .DS_Store
 bin
-out
-out-docker
+out-*
 tools
 
 
@@ -51,9 +50,6 @@ vendor/*
 package/source
 package/out
 integration-tests/vendor
-vendor-provision/*
-vendor-kuberang/*
-vendor-helm
-vendor-swagger-ui
+vendor-*
 .glide
 pkg/server/server
