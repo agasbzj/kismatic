@@ -2,7 +2,7 @@ version: 2
 defaults: &defaults
   working_directory: /go/src/github.com/apprenda/kismatic
   docker:
-    - image: circleci/golang:1.9.2
+    - image: circleci/golang:1.9.4
 
 jobs:
   build:
@@ -43,8 +43,6 @@ jobs:
       - run:
           name: Linux dist
           command: GOOS=linux make dist-host
-      - run: 
-          name: 
       - store_artifacts:
           path: out/kismatic.tar.gz
           destination: kismatic-linux-amd64.tar.gz
