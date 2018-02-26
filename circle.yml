@@ -2,7 +2,7 @@ version: 2
 defaults: &defaults
   working_directory: /go/src/github.com/apprenda/kismatic
   docker:
-    - image: circleci/golang:1.9.2
+    - image: circleci/golang:1.9.4
 
 jobs:
   build:
@@ -13,8 +13,11 @@ jobs:
           name: Install unzip
           command: sudo apt update && sudo apt install unzip
       - run:
+          name: Install glide packages
+          command: make vendor && make glide-install
+      - run:
           name: Unit tests
-          command: make bare-test
+          command: make test-host
       - run:
           name: Verify gofmt
           command: diff -u <(echo -n) <(gofmt -d ./pkg ./cmd)
@@ -30,7 +33,7 @@ jobs:
           command: mkdir release
       - run:
           name: Darwin dist
-          command: GLIDE_GOOS=linux GOOS=darwin make bare-dist
+          command: GLIDE_GOOS=linux GOOS=darwin make dist-host
       - store_artifacts:
           path: out/kismatic.tar.gz
           destination: kismatic-darwin-amd64.tar.gz
@@ -39,7 +42,9 @@ jobs:
           command: mv out/kismatic.tar.gz release/kismatic-${CIRCLE_TAG}-darwin-amd64.tar.gz
       - run:
           name: Linux dist
-          command: GOOS=linux make bare-dist
+          command: GOOS=linux make dist-host
+      - run: 
+          name: 
       - store_artifacts:
           path: out/kismatic.tar.gz
           destination: kismatic-linux-amd64.tar.gz
@@ -48,7 +53,7 @@ jobs:
           command: cp out/kismatic.tar.gz release/kismatic-${CIRCLE_TAG}-linux-amd64.tar.gz
       - run:
           name: Docker dist
-          command: make docker-dist
+          command: make dist-docker
       - run:
           name: Set integration test SSH Key 
           command: echo "$KISMATIC_INT_TEST_KEY" | base64 -d > ~/.ssh/kismatic-integration-testing.pem
