@@ -92,6 +92,9 @@ all:
 
 
 all-host:
+	@$(MAKE) GOOS=darwin make dist-host
+	@$(MAKE) GOOS=linux make dist-host
+	@$(MAKE) make dist-docker
 
 shallow-clean:
 	rm -rf $(BUILD_OUTPUT)
